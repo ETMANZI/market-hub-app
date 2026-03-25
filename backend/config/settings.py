@@ -133,9 +133,5 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
-CSRF_TRUSTED_ORIGINS = [
-    "https://market-hub-app-production-7142.up.railway.app"
-]
-CSRF_COOKIE_SECURE = True
-SESSION_COOKIE_SECURE = True
+
 
