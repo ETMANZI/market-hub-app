@@ -1,9 +1,10 @@
 import { MapContainer, TileLayer, Marker, useMapEvents, useMap } from "react-leaflet";
 import { useEffect, useMemo, useState } from "react";
-import L from "leaflet";
+import L, { type LeafletMouseEvent } from "leaflet";
 
 const icon = new L.Icon({
   iconUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png",
+  shadowUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png",
   iconSize: [25, 41],
   iconAnchor: [12, 41],
 });
@@ -12,6 +13,11 @@ type Props = {
   latitude?: number;
   longitude?: number;
   onChange: (lat: number, lng: number) => void;
+};
+
+type NominatimResult = {
+  lat: string;
+  lon: string;
 };
 
 function isValidCoord(value: unknown): value is number {
@@ -24,11 +30,13 @@ function LocationMarker({ latitude, longitude, onChange }: Props) {
   useEffect(() => {
     if (isValidCoord(latitude) && isValidCoord(longitude)) {
       setPosition([latitude, longitude]);
+    } else {
+      setPosition(null);
     }
   }, [latitude, longitude]);
 
   useMapEvents({
-    click(e) {
+    click(e: LeafletMouseEvent) {
       const { lat, lng } = e.latlng;
       setPosition([lat, lng]);
       onChange(lat, lng);
@@ -72,6 +80,9 @@ export default function MapPicker({ latitude, longitude, onChange }: Props) {
     if (isValidCoord(latitude) && isValidCoord(longitude)) {
       setSelectedLat(latitude);
       setSelectedLng(longitude);
+    } else {
+      setSelectedLat(undefined);
+      setSelectedLng(undefined);
     }
   }, [latitude, longitude]);
 
@@ -90,7 +101,7 @@ export default function MapPicker({ latitude, longitude, onChange }: Props) {
       setError("");
 
       const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(
-        query + ", Rwanda"
+        `${query}, Rwanda`
       )}&limit=1`;
 
       const res = await fetch(url, {
@@ -99,15 +110,15 @@ export default function MapPicker({ latitude, longitude, onChange }: Props) {
         },
       });
 
-      const data = await res.json();
+      const data: NominatimResult[] = await res.json();
 
-      if (!data || data.length === 0) {
+      if (!data.length) {
         setError("Location not found.");
         return;
       }
 
-      const lat = Number(data[0]?.lat);
-      const lng = Number(data[0]?.lon);
+      const lat = Number(data[0].lat);
+      const lng = Number(data[0].lon);
 
       if (!isValidCoord(lat) || !isValidCoord(lng)) {
         setError("Invalid location returned.");

@@ -39,31 +39,33 @@ export default function HomePage() {
     },
   });
 
-  const slides = useMemo<HeroSlide[]>(() => {
+  const slides = useMemo((): HeroSlide[] => {
     const sortedListings = [...listings].sort((a, b) => {
       if (a.is_featured && !b.is_featured) return -1;
       if (!a.is_featured && b.is_featured) return 1;
       return 0;
     });
 
-    return sortedListings
-      .map((listing) => {
-        const coverImage =
-          listing.images?.find((img) => img.is_cover)?.image ||
-          listing.images?.[0]?.image ||
-          "";
+    const result: HeroSlide[] = [];
 
-        if (!coverImage) return null;
+    for (const listing of sortedListings) {
+      const coverImage =
+        listing.images?.find((img) => img.is_cover)?.image ||
+        listing.images?.[0]?.image ||
+        "";
 
-        return {
-          listingId: String(listing.id),
-          title: listing.title,
-          image: coverImage,
-          contactPhone: listing.contact_phone,
-          isFeatured: listing.is_featured,
-        };
-      })
-      .filter((slide): slide is HeroSlide => slide !== null);
+      if (!coverImage) continue;
+
+      result.push({
+        listingId: String(listing.id),
+        title: listing.title,
+        image: coverImage,
+        contactPhone: listing.contact_phone || undefined,
+        isFeatured: listing.is_featured || undefined,
+      });
+    }
+
+    return result;
   }, [listings]);
 
   useEffect(() => {
@@ -80,16 +82,14 @@ export default function HomePage() {
     if (currentSlide >= slides.length) {
       setCurrentSlide(0);
     }
-  }, [slides.length, currentSlide]);
+  }, [currentSlide, slides.length]);
 
   const activeSlide = slides[currentSlide];
 
   return (
     <div className="min-h-screen bg-slate-50">
-   
-
       <PageContainer>
-          <section className="grid gap-8 pt-2 pb-12 md:grid-cols-2 md:items-center md:pt-3 md:pb-20">
+        <section className="grid gap-8 pt-2 pb-12 md:grid-cols-2 md:items-center md:pt-3 md:pb-20">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -101,7 +101,6 @@ export default function HomePage() {
             <h1 className="mt-4 text-3xl font-bold leading-tight md:text-5xl">
               <AnimatedText text="Modern marketplace for buying, selling, and advertising." />
             </h1>
-
 
             <div className="mt-4 text-lg text-slate-600">
               <AnimatedText
@@ -118,8 +117,6 @@ export default function HomePage() {
               >
                 Browse listings
               </Link>
-
-
             </div>
           </motion.div>
 
