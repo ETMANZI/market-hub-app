@@ -9,15 +9,15 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = os.environ.get("SECRET_KEY", "dev-secret-key")
 DEBUG = os.environ.get("DEBUG", "False").lower() == "true"
 
-ALLOWED_HOSTS = os.environ.get(
+ALLOWED_HOSTS = [h.strip() for h in os.environ.get(
     "ALLOWED_HOSTS",
     ".railway.app,localhost,127.0.0.1"
-).split(",")
+).split(",") if h.strip()]
 
-CSRF_TRUSTED_ORIGINS = os.environ.get(
+CSRF_TRUSTED_ORIGINS = [h.strip() for h in os.environ.get(
     "CSRF_TRUSTED_ORIGINS",
     "https://*.railway.app"
-).split(",")
+).split(",") if h.strip()]
 
 INSTALLED_APPS = [
     "django.contrib.admin",
@@ -76,7 +76,7 @@ DATABASES = {
     "default": dj_database_url.parse(
         DATABASE_URL if DATABASE_URL else f"sqlite:///{BASE_DIR / 'db.sqlite3'}",
         conn_max_age=600,
-        ssl_require=not DEBUG,
+        ssl_require=False,
     )
 }
 
@@ -151,27 +151,27 @@ AUTH_PASSWORD_VALIDATORS = [
 
 if not DEBUG:
     SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
-    SECURE_SSL_REDIRECT = False
     SESSION_COOKIE_SECURE = True
     CSRF_COOKIE_SECURE = True
-    SECURE_BROWSER_XSS_FILTER = True
     SECURE_CONTENT_TYPE_NOSNIFF = True
 
 if os.environ.get("CREATE_SUPERUSER") == "1":
     try:
         from django.contrib.auth import get_user_model
-
         User = get_user_model()
 
         admin_username = os.environ.get("DJANGO_SUPERUSER_USERNAME", "admin")
         admin_email = os.environ.get("DJANGO_SUPERUSER_EMAIL", "admin@example.com")
         admin_password = os.environ.get("DJANGO_SUPERUSER_PASSWORD", "Admin123!")
 
-        if not User.objects.filter(username=admin_username).exists():
+        if not User.objects.filter(email=admin_email).exists():
             User.objects.create_superuser(
-                username=admin_username,
                 email=admin_email,
+                username=admin_username,
                 password=admin_password,
             )
+            print(f"Superuser created: {admin_email}")
+        else:
+            print(f"Superuser already exists: {admin_email}")
     except Exception as e:
         print(f"Superuser creation skipped: {e}")
