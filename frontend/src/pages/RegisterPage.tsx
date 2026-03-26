@@ -104,9 +104,11 @@ export default function RegisterPage() {
       } else if (Array.isArray(backend)) {
         setError(backend.join(", "));
       } else if (backend && typeof backend === "object") {
-        setError(JSON.stringify(backend));
+        // setError(JSON.stringify(backend));
+        setError(`BACKEND: ${JSON.stringify(backend)}`);
       } else if (err?.message) {
-        setError(err.message);
+        // setError(err.message);
+        setError(`ERRMSG: ${err.message}`);
       } else {
         setError("Registration failed again 1111. Please try again.");
       }
