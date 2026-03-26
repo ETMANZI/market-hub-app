@@ -53,6 +53,7 @@ export default function RegisterPage() {
   }, []);
 
   const onSubmit = async (data: RegisterForm) => {
+    console.log("SUBMIT FIRED", data);
     try {
       setError("");
       setSuccess("");
@@ -76,6 +77,7 @@ export default function RegisterPage() {
       console.log("REGISTER ERROR:", err);
       console.log("REGISTER RESPONSE:", err?.response);
       console.log("REGISTER RESPONSE DATA:", err?.response?.data);
+      console.log("REGISTER MESSAGE:", err?.message);
 
       const backend = err?.response?.data;
 
@@ -347,9 +349,18 @@ export default function RegisterPage() {
                   </div>
                 )}
 
-                <Button type="submit" className="mt-2 w-full py-3 text-base">
+                {/* <Button type="submit" className="mt-2 w-full py-3 text-base">
                   Create account
-                </Button>
+                </Button> */}
+
+<button
+  type="submit"
+  className="mt-2 w-full rounded-2xl bg-slate-900 px-4 py-3 text-base font-medium text-white hover:bg-slate-800"
+>
+  Create account
+</button>
+
+
               </form>
 
               <div className="mt-6 text-center text-sm text-slate-500">
