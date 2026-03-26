@@ -25,12 +25,21 @@ class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
         return super().validate(attrs)
 
 
+from rest_framework import serializers
+from django.contrib.auth import password_validation
+from django.contrib.auth import get_user_model
+from apps.accounts.models import Profile
+
+User = get_user_model()
+
+
 class RegisterSerializer(serializers.ModelSerializer):
     first_name = serializers.CharField(required=True)
     last_name = serializers.CharField(required=True)
     phone_number = serializers.CharField(required=False, allow_blank=True)
     confirm_password = serializers.CharField(write_only=True)
     password = serializers.CharField(write_only=True)
+    role = serializers.CharField(required=False, default=User.Role.BUYER)
 
     class Meta:
         model = User
@@ -46,25 +55,29 @@ class RegisterSerializer(serializers.ModelSerializer):
             "role",
         ]
 
+    # ✅ Email validation
     def validate_email(self, value):
+        value = value.strip().lower()
         if User.objects.filter(email__iexact=value).exists():
             raise serializers.ValidationError("An account with this email already exists.")
         return value
 
+    # ✅ Username validation
     def validate_username(self, value):
+        value = value.strip()
         if User.objects.filter(username__iexact=value).exists():
             raise serializers.ValidationError("This username is already taken.")
         return value
 
+    # ✅ Role validation (case-safe)
     def validate_role(self, value):
-        allowed_roles = [
-            User.Role.BUYER,
-            User.Role.SELLER,
-        ]
+        value = (value or "").strip().lower()
+        allowed_roles = [User.Role.BUYER, User.Role.SELLER]
         if value not in allowed_roles:
             raise serializers.ValidationError("Invalid account type.")
         return value
 
+    # ✅ Password match + Django validation
     def validate(self, attrs):
         if attrs["password"] != attrs["confirm_password"]:
             raise serializers.ValidationError(
@@ -74,16 +87,27 @@ class RegisterSerializer(serializers.ModelSerializer):
         password_validation.validate_password(attrs["password"])
         return attrs
 
+    # ✅ Create user safely
     def create(self, validated_data):
-        validated_data.pop("confirm_password")
-        password = validated_data.pop("password")
+        try:
+            validated_data.pop("confirm_password", None)
+            password = validated_data.pop("password")
 
-        user = User(**validated_data)
-        user.set_password(password)
-        user.save()
+            validated_data["email"] = validated_data["email"].strip().lower()
+            validated_data["role"] = validated_data.get("role", User.Role.BUYER)
 
-        Profile.objects.create(user=user)
-        return user
+            user = User(**validated_data)
+            user.set_password(password)
+            user.save()
+
+            # 🔥 Safe profile creation (prevents crash)
+            Profile.objects.get_or_create(user=user)
+
+            return user
+
+        except Exception as e:
+            # 🔥 This will show REAL error on frontend
+            raise serializers.ValidationError(str(e))
 
 
 class UserSerializer(serializers.ModelSerializer):
