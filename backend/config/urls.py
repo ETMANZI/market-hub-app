@@ -10,6 +10,7 @@ from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView
 
 def health_check(request):
     return JsonResponse({"ok": True})
+
 def accounts_test(request):
     return JsonResponse({"accounts": "ok"})
 
