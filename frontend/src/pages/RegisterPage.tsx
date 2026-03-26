@@ -108,7 +108,7 @@ export default function RegisterPage() {
       } else if (err?.message) {
         setError(err.message);
       } else {
-        setError("Registration failed. Please try again.");
+        setError("Registration failed again. Please try again.");
       }
     }
   };
