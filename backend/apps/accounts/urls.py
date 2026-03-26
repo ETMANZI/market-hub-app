@@ -1,4 +1,5 @@
 from django.urls import path,include
+from django.http import JsonResponse
 from rest_framework_simplejwt.views import (
     TokenRefreshView,
 )
@@ -6,8 +7,12 @@ from rest_framework_simplejwt.views import (
 from .views import AdminUserDetailView, AdminUserListCreateView, ChangePasswordView, RegisterView, MeView, health_check
 from .views import CustomTokenObtainPairView,NonAdminUserListView, NonAdminUserUpdateView,ForgotPasswordView, ResetPasswordConfirmView
 
+
+def test_accounts(request):
+    return JsonResponse({"accounts": "ok"})
+
 urlpatterns = [
-    
+    path("test/", test_accounts),
     path('register/', RegisterView.as_view(), name='register'),
     path('login/', CustomTokenObtainPairView.as_view(), name='login'),
     path('token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
