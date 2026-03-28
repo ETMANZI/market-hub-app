@@ -211,16 +211,3 @@ if not DEBUG:
     SECURE_HSTS_INCLUDE_SUBDOMAINS = True
     SECURE_HSTS_PRELOAD = True
     X_FRAME_OPTIONS = "DENY"
-    
-    
-    
-    
-    
-from django.core.management import call_command
-
-if os.environ.get('RAILWAY_ENVIRONMENT') and not os.environ.get('RUN_MAIN'):
-    try:
-        call_command('migrate', interactive=False)
-        print("✅ Migrations applied successfully")
-    except Exception as e:
-        print(f"Migration error: {e}")
