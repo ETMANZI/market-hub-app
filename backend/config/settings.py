@@ -86,14 +86,24 @@ DATABASE_URL = os.environ.get("DATABASE_URL")
 
 
 
+DATABASE_URL = os.environ.get("DATABASE_URL")
+
 if DATABASE_URL:
     DATABASES = {
-        "default": dj_database_url.config(
-            default=DATABASE_URL,
+        "default": dj_database_url.parse(
+            DATABASE_URL,
             conn_max_age=600,
             conn_health_checks=True,
-            ssl_require=True,  # Railway PostgreSQL requires SSL
         )
+    }
+    # Add connection pool settings for Railway
+    DATABASES["default"]["OPTIONS"] = {
+        "connect_timeout": 30,
+        "keepalives": 1,
+        "keepalives_idle": 30,
+        "keepalives_interval": 10,
+        "keepalives_count": 5,
+        "sslmode": "disable",  # Internal URL doesn't need SSL
     }
 else:
     DATABASES = {
@@ -102,7 +112,6 @@ else:
             "NAME": BASE_DIR / "db.sqlite3",
         }
     }
-
 
 
 
