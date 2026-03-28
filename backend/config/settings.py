@@ -1,7 +1,9 @@
 import os
 from pathlib import Path
 from datetime import timedelta
-
+import cloudinary
+import cloudinary.uploader
+import cloudinary.api
 import dj_database_url
 
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -38,6 +40,8 @@ INSTALLED_APPS = [
     "apps.accounts",
     "apps.payments",
     "apps.moderation",
+    'cloudinary',
+    'cloudinary_storage',
 ]
 
 MIDDLEWARE = [
@@ -143,7 +147,7 @@ os.makedirs(MEDIA_ROOT, exist_ok=True)
 
 STORAGES = {
     "default": {
-        "BACKEND": "django.core.files.storage.FileSystemStorage",
+        "BACKEND": "cloudinary_storage.storage.MediaCloudinaryStorage",  # Changed
     },
     "staticfiles": {
         "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
@@ -219,3 +223,11 @@ if not DEBUG:
 DATA_UPLOAD_MAX_MEMORY_SIZE = 10 * 1024 * 1024  # 10 MB
 FILE_UPLOAD_MAX_MEMORY_SIZE = 10 * 1024 * 1024  # 10 MB
 DATA_UPLOAD_MAX_NUMBER_FIELDS = 2000
+
+DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
+
+CLOUDINARY_STORAGE = {
+    'CLOUD_NAME': os.environ.get('CLOUDINARY_CLOUD_NAME'),
+    'API_KEY': os.environ.get('CLOUDINARY_API_KEY'),
+    'API_SECRET': os.environ.get('CLOUDINARY_API_SECRET'),
+}
