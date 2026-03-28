@@ -81,10 +81,9 @@ if DATABASE_URL:
             default=DATABASE_URL,
             conn_max_age=600,
             conn_health_checks=True,
-            ssl_require=False,  # Internal URL doesn't need SSL
+            ssl_require=False,
         )
     }
-    # Add connection pool settings for Railway
     DATABASES["default"]["OPTIONS"] = {
         "connect_timeout": 30,
         "keepalives": 1,
@@ -127,12 +126,20 @@ TIME_ZONE = "Africa/Kigali"
 USE_I18N = True
 USE_TZ = True
 
+# Static files (CSS, JavaScript, Images)
 STATIC_URL = "/static/"
 STATIC_ROOT = BASE_DIR / "staticfiles"
 
 STATICFILES_DIRS = []
 if (BASE_DIR / "static").exists():
     STATICFILES_DIRS = [BASE_DIR / "static"]
+
+# Media files (User uploaded content)
+MEDIA_URL = "/media/"
+MEDIA_ROOT = BASE_DIR / "media"
+
+# Ensure media directory exists
+os.makedirs(MEDIA_ROOT, exist_ok=True)
 
 STORAGES = {
     "default": {
@@ -143,19 +150,15 @@ STORAGES = {
     },
 }
 
-MEDIA_URL = "/media/"
-MEDIA_ROOT = BASE_DIR / "media"
-
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
-# CORS CONFIGURATION - UPDATED
+# CORS CONFIGURATION
 CORS_ALLOWED_ORIGINS = [
-    "http://localhost:5173",  # Vite dev
+    "http://localhost:5173",
     "http://localhost:3000",
-    "https://*.railway.app",  # All Railway apps
+    "https://*.railway.app",
 ]
 
-# Add FRONTEND_URL if set in environment
 FRONTEND_URL = os.environ.get("FRONTEND_URL", "")
 if FRONTEND_URL:
     CORS_ALLOWED_ORIGINS.append(FRONTEND_URL)
@@ -199,7 +202,7 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
-# SECURITY SETTINGS - FIXED FOR RAILWAY SSL
+# SECURITY SETTINGS
 if not DEBUG:
     SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
     SECURE_SSL_REDIRECT = True
@@ -207,11 +210,12 @@ if not DEBUG:
     CSRF_COOKIE_SECURE = True
     SECURE_CONTENT_TYPE_NOSNIFF = True
     SECURE_BROWSER_XSS_FILTER = True
-    SECURE_HSTS_SECONDS = 31536000  # 1 year
+    SECURE_HSTS_SECONDS = 31536000
     SECURE_HSTS_INCLUDE_SUBDOMAINS = True
     SECURE_HSTS_PRELOAD = True
     X_FRAME_OPTIONS = "DENY"
-    
-    
-    
- 
+
+# File upload settings
+DATA_UPLOAD_MAX_MEMORY_SIZE = 10 * 1024 * 1024  # 10 MB
+FILE_UPLOAD_MAX_MEMORY_SIZE = 10 * 1024 * 1024  # 10 MB
+DATA_UPLOAD_MAX_NUMBER_FIELDS = 2000
