@@ -52,4 +52,3 @@ whitenoise==6.7.0
 
 gunicorn==23.0.0
 
-dj-database-url
