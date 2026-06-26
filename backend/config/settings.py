@@ -34,16 +34,19 @@ else:
     ALLOWED_HOSTS = [h.strip() for h in ALLOWED_HOSTS if h.strip()]
     
     if not ALLOWED_HOSTS:
-        ALLOWED_HOSTS = ['.railway.app', 'isokoryawe.rw', 'www.isokoryawe.rw']
+        ALLOWED_HOSTS = ['.herokuapp.com', 'isokoryawe.herokuapp.com', 'isokorya.rw', 'www.isokorya.rw']
     
     CSRF_TRUSTED_ORIGINS = os.environ.get("CSRF_TRUSTED_ORIGINS", "").split(",")
     CSRF_TRUSTED_ORIGINS = [h.strip() for h in CSRF_TRUSTED_ORIGINS if h.strip()]
     
     if not CSRF_TRUSTED_ORIGINS:
         CSRF_TRUSTED_ORIGINS = [
-            'https://*.railway.app',
+            'https://*.herokuapp.com',
+            'https://isokoryawe.herokuapp.com',
             'https://isokoryawe.rw',
             'https://www.isokoryawe.rw',
+            'http://isokoryawe.rw',
+            'http://www.isokorya.rw',
         ]
     
     SECRET_KEY = os.environ.get("SECRET_KEY")
