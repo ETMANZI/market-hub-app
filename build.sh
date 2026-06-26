@@ -1,5 +1,3 @@
-#!/bin/bash
-# build.sh - Heroku build script for Django + React
 
 echo "🚀 Starting Heroku build process..."
 
