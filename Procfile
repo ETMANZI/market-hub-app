@@ -1,1 +1,1 @@
-web: gunicorn backend.config.wsgi:application
+echo "web: gunicorn backend.config.wsgi:application" > Procfile
