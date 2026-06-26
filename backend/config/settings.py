@@ -4,13 +4,16 @@ import re
 from pathlib import Path
 from datetime import timedelta
 from dotenv import load_dotenv
+import dj_database_url  # ✅ ADD THIS
 
 # Load environment variables
 load_dotenv()
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-
+# ============================================
+# DJANGO CORE SETTINGS
+# ============================================
 
 IS_RUNSERVER = 'runserver' in sys.argv
 
@@ -25,8 +28,6 @@ if IS_RUNSERVER:
         'http://127.0.0.1:8000',
     ]
     SECRET_KEY = os.environ.get("SECRET_KEY", "dev-secret-key-change-in-production")
-    
-   
 else:
     # Production settings
     DEBUG = os.environ.get("DEBUG", "False").lower() == "true"
@@ -53,7 +54,9 @@ else:
     if not SECRET_KEY:
         raise ValueError("SECRET_KEY environment variable must be set in production!")
 
-
+# ============================================
+# INSTALLED APPS
+# ============================================
 
 INSTALLED_APPS = [
     "django.contrib.admin",
@@ -111,54 +114,33 @@ TEMPLATES = [
     },
 ]
 
+# ============================================
+# DATABASE CONFIGURATION - FIXED ✅
+# ============================================
 
-
-def parse_database_url(db_url):
-    """Parse database URL manually without dj-database-url"""
-    if not db_url:
-        return None
-    
-    # PostgreSQL: postgresql://user:password@host:port/dbname
-    if db_url.startswith('postgresql://'):
-        match = re.match(r'postgresql://([^:]+):([^@]+)@([^:]+):(\d+)/(.+)', db_url)
-        if match:
-            user, password, host, port, dbname = match.groups()
-            return {
-                'ENGINE': 'django.db.backends.postgresql',
-                'NAME': dbname,
-                'USER': user,
-                'PASSWORD': password,
-                'HOST': host,
-                'PORT': port,
-            }
-    
-    # SQLite: sqlite:///path/to/db.sqlite3
-    if db_url.startswith('sqlite:///'):
-        path = db_url.replace('sqlite:///', '')
-        return {
-            'ENGINE': 'django.db.backends.sqlite3',
-            'NAME': path,
-        }
-    
-    return None
-
-# Configure database
-db_url = os.environ.get("DATABASE_URL")
-db_config = parse_database_url(db_url) if db_url else None
-
-if db_config:
-    DATABASES = {'default': db_config}
+DATABASE_URL = os.environ.get("DATABASE_URL")
+if DATABASE_URL:
+    DATABASES = {
+        "default": dj_database_url.config(
+            default=DATABASE_URL,
+            conn_max_age=600,
+            conn_health_checks=True,
+            ssl_require=False,
+        )
+    }
 else:
     DATABASES = {
-        'default': {
-            'ENGINE': 'django.db.backends.sqlite3',
-            'NAME': BASE_DIR / 'db.sqlite3',
+        "default": {
+            "ENGINE": "django.db.backends.sqlite3",
+            "NAME": BASE_DIR / "db.sqlite3",
         }
     }
 
 AUTH_USER_MODEL = "accounts.User"
 
-
+# ============================================
+# REST FRAMEWORK
+# ============================================
 
 REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": (
@@ -180,14 +162,18 @@ SIMPLE_JWT = {
     "REFRESH_TOKEN_LIFETIME": timedelta(days=7),
 }
 
-
+# ============================================
+# INTERNATIONALIZATION
+# ============================================
 
 LANGUAGE_CODE = "en-us"
 TIME_ZONE = "Africa/Kigali"
 USE_I18N = True
 USE_TZ = True
 
-
+# ============================================
+# STATIC & MEDIA FILES
+# ============================================
 
 STATIC_URL = "/static/"
 STATIC_ROOT = BASE_DIR / "staticfiles"
@@ -200,6 +186,9 @@ MEDIA_URL = "/media/"
 MEDIA_ROOT = BASE_DIR / "media"
 os.makedirs(MEDIA_ROOT, exist_ok=True)
 
+# ============================================
+# STORAGE (Cloudinary or Local)
+# ============================================
 
 USE_CLOUDINARY = (
     os.environ.get('CLOUDINARY_CLOUD_NAME') and
@@ -219,7 +208,6 @@ if USE_CLOUDINARY and not IS_RUNSERVER:
         secure=True
     )
     
-    # Use STORAGES (Django 4.2+)
     STORAGES = {
         "default": {
             "BACKEND": "cloudinary_storage.storage.MediaCloudinaryStorage",
@@ -229,7 +217,6 @@ if USE_CLOUDINARY and not IS_RUNSERVER:
         },
     }
 else:
-    # Use local file storage for development
     STORAGES = {
         "default": {
             "BACKEND": "django.core.files.storage.FileSystemStorage",
@@ -239,11 +226,11 @@ else:
         },
     }
 
-
-
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
-
+# ============================================
+# CORS CONFIGURATION
+# ============================================
 
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:5173",
@@ -283,7 +270,9 @@ CORS_ALLOW_HEADERS = [
     "x-requested-with",
 ]
 
-
+# ============================================
+# EMAIL CONFIGURATION
+# ============================================
 
 if IS_RUNSERVER:
     EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
@@ -296,7 +285,9 @@ else:
     EMAIL_HOST_PASSWORD = os.environ.get("EMAIL_HOST_PASSWORD", "")
     DEFAULT_FROM_EMAIL = os.environ.get("DEFAULT_FROM_EMAIL", "noreply@markethub.com")
 
-
+# ============================================
+# AUTHENTICATION
+# ============================================
 
 AUTH_PASSWORD_VALIDATORS = [
     {"NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator"},
@@ -305,7 +296,9 @@ AUTH_PASSWORD_VALIDATORS = [
     {"NAME": "django.contrib.auth.password_validation.NumericPasswordValidator"},
 ]
 
-
+# ============================================
+# SECURITY (Production only)
+# ============================================
 
 if not IS_RUNSERVER and not DEBUG:
     SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
@@ -324,13 +317,17 @@ else:
     CSRF_COOKIE_SECURE = False
     SECURE_HSTS_SECONDS = 0
 
-
+# ============================================
+# FILE UPLOAD SETTINGS
+# ============================================
 
 DATA_UPLOAD_MAX_MEMORY_SIZE = 110 * 1024 * 1024
 FILE_UPLOAD_MAX_MEMORY_SIZE = 110 * 1024 * 1024
 DATA_UPLOAD_MAX_NUMBER_FIELDS = 2000
 
-
+# ============================================
+# LOGGING (Development only)
+# ============================================
 
 if IS_RUNSERVER:
     LOGGING = {
