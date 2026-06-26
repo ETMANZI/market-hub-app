@@ -52,7 +52,3 @@ whitenoise==6.7.0
 
 gunicorn==23.0.0
 
-ipython==8.18.1
-ipdb==0.13.13
-pytest==8.3.3
-coverage==7.6.1
