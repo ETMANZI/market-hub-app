@@ -46,7 +46,7 @@ else:
             'https://isokoryawe.rw',
             'https://www.isokoryawe.rw',
             'http://isokoryawe.rw',
-            'http://www.isokorya.rw',
+            'http://www.isokoryawe.rw',
         ]
     
     SECRET_KEY = os.environ.get("SECRET_KEY")
