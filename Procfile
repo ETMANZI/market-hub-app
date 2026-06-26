@@ -1,5 +1,3 @@
-# Overwrite the Procfile with the correct content
-echo "web: gunicorn backend.config.wsgi:application" > Procfile
+web: gunicorn backend.config.wsgi:application
 
-# Verify it's correct
-cat Procfile
+
